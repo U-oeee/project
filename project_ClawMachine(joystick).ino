@@ -1,8 +1,8 @@
 // 4방향 스위치 핀 설정
-int dirDown = 3;
-int dirUp = 11;
-int dirRight = 10;
-int dirLeft = 9;
+int dirDown = 10;
+int dirUp = 9;
+int dirRight = 3;
+int dirLeft = 11;
 
 // 스텝 모터 핀 설정
 int M1dirpin = 4;
