@@ -5,10 +5,20 @@ int dirRight = 3;
 int dirLeft = 11;
 
 // 스텝 모터 핀 설정
-int M1dirpin = 4;
-int M1steppin = 5;
-int M2dirpin = 7;
-int M2steppin = 6;
+int M1dirpin = 7;
+int M1steppin = 6;
+int M2dirpin = 4;
+int M2steppin = 5;
+
+// 이동 범위 설정
+const int xMinPosition = -56;
+const int xMaxPosition = 48;
+const int yMinPosition = -65;
+const int yMaxPosition = 70;
+
+// 현재 위치 추적
+int currentX = 0; // X축 초기 위치 (중간값)
+int currentY = 0; // Y축 초기 위치 (중간값)
 
 // 속도 설정 (중간값으로 조정)
 int minSpeed = 300; // 최소 딜레이 (마이크로초)
@@ -36,26 +46,36 @@ void loop() {
   int speed = map(potValue, 0, 1023, minSpeed, maxSpeed); // 속도 계산
 
   // 4방향 스위치 입력 처리
-  if (digitalRead(dirDown) == LOW) {
+  if (digitalRead(dirDown) == LOW && currentY > yMinPosition) {
     Serial.print("Down, Speed: ");
     Serial.println(speed);
-    moveMotor(M2dirpin, M2steppin, LOW, speed); // 아래쪽: Y축 모터 역방향
-  } else if (digitalRead(dirUp) == LOW) {
+    moveMotor(M2dirpin, M2steppin, HIGH, speed); // 아래쪽: Y축 모터 정방향
+    currentY--; // Y축 위치 감소
+  } else if (digitalRead(dirUp) == LOW && currentY < yMaxPosition) {
     Serial.print("Up, Speed: ");
     Serial.println(speed);
-    moveMotor(M2dirpin, M2steppin, HIGH, speed); // 위쪽: Y축 모터 정방향
-  } else if (digitalRead(dirRight) == LOW) {
+    moveMotor(M2dirpin, M2steppin, LOW, speed); // 위쪽: Y축 모터 역방향
+    currentY++; // Y축 위치 증가
+  } else if (digitalRead(dirRight) == LOW && currentX < xMaxPosition) {
     Serial.print("Right, Speed: ");
     Serial.println(speed);
-    moveMotor(M1dirpin, M1steppin, HIGH, speed); // 오른쪽: X축 모터 정방향
-  } else if (digitalRead(dirLeft) == LOW) {
+    moveMotor(M1dirpin, M1steppin, LOW, speed); // 오른쪽: X축 모터 역방향
+    currentX++; // X축 위치 증가
+  } else if (digitalRead(dirLeft) == LOW && currentX > xMinPosition) {
     Serial.print("Left, Speed: ");
     Serial.println(speed);
-    moveMotor(M1dirpin, M1steppin, LOW, speed); // 왼쪽: X축 모터 역방향
+    moveMotor(M1dirpin, M1steppin, HIGH, speed); // 왼쪽: X축 모터 정방향
+    currentX--; // X축 위치 감소
   } else {
     Serial.println("Stop");
     stopMotors(); // 모든 모터 정지
   }
+
+  // 현재 위치 출력
+  Serial.print("Current X: ");
+  Serial.print(currentX);
+  Serial.print(", Current Y: ");
+  Serial.println(currentY);
 
   delay(10); // 상태 확인 딜레이
 }
