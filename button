@@ -1,0 +1,116 @@
+const int button1 = 2; 
+const int button2 = 3;
+
+int M1dirpin = 4;
+int M1steppin = 5;
+int M2dirpin = 7;
+int M2steppin = 6;
+
+int startstate = 0;//시작 여부 확인 변수
+int rotationlimit = 3000;//일단 3초로 설정. 조정 필요시 이것만 바꾸면 됌.
+int s;
+
+void setup() {
+  pinMode(button1, INPUT_PULLUP); 
+  pinMode(button2, INPUT_PULLUP);
+
+  pinMode(M1dirpin,OUTPUT);
+  pinMode(M1steppin,OUTPUT);
+  pinMode(M2dirpin,OUTPUT);
+  pinMode(M2steppin,OUTPUT);
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  if(digitalRead(button1) == LOW){
+    if(startstate == 0){
+      Serial.println("Start");//시작 상태
+      delay(500);
+      startstate = 1;
+      
+    }
+    else if(startstate == 1){
+      Serial.println("Already started");//이미 시작 상태가 되었는데 다시 시작 버튼을 누르면 출력
+      delay(500);
+    }
+  }
+  else if(digitalRead(button2) == LOW){
+    if(startstate == 1){
+      Serial.println("Grab and drop Intiating");//시작 상태에서 모터 조작 버튼을 누르면 작동. 일단 은 1초의 대기시간을 가지며 3초씩 정회전
+      for(s = 0; s<=rotationlimit; s++){
+        delayMicroseconds(2);
+        digitalWrite(M1dirpin,HIGH);
+        digitalWrite(M2dirpin,HIGH);
+        digitalWrite(M1steppin,LOW);
+        digitalWrite(M2steppin,LOW);
+        delayMicroseconds(2);
+        digitalWrite(M1steppin,HIGH);
+        digitalWrite(M2steppin,HIGH);
+        delay(1);
+        //스텝모터 정회전: 하강
+      }
+
+      //서보모터 제어: 잡기
+
+      delay(1000);
+
+      for(s = 0; s<=rotationlimit; s++){
+        delayMicroseconds(2);
+        digitalWrite(M1dirpin,LOW);
+        digitalWrite(M2dirpin,LOW);
+        digitalWrite(M1steppin,LOW);
+        digitalWrite(M2steppin,LOW);
+        delayMicroseconds(2);
+        digitalWrite(M1steppin,HIGH);
+        digitalWrite(M2steppin,HIGH);
+        delay(1);
+        //스텝모터 역회전: 상승
+      }
+
+      //배출구로 이동
+
+      delay(1000);
+
+      for(s = 0; s<=rotationlimit; s++){
+        delayMicroseconds(2);
+        digitalWrite(M1dirpin,HIGH);
+        digitalWrite(M2dirpin,HIGH);
+        digitalWrite(M1steppin,LOW);
+        digitalWrite(M2steppin,LOW);
+        delayMicroseconds(2);
+        digitalWrite(M1steppin,HIGH);
+        digitalWrite(M2steppin,HIGH);
+        delay(1);
+        //스텝모터 정회전: 하강
+      }
+
+      //서보모터 제어: 놓기
+
+      delay(1000);
+
+      for(s = 0; s<=rotationlimit; s++){
+        delayMicroseconds(2);
+        digitalWrite(M1dirpin,LOW);
+        digitalWrite(M2dirpin,LOW);
+        digitalWrite(M1steppin,LOW);
+        digitalWrite(M2steppin,LOW);
+        delayMicroseconds(2);
+        digitalWrite(M1steppin,HIGH);
+        digitalWrite(M2steppin,HIGH);
+        delay(1);
+        //스텝모터 역회전: 상승
+      }
+
+      //시작 지점으로 복귀
+
+      delay(1000);
+
+      startstate = 0;//시작 상태 초기화
+    }
+    else if(startstate == 0){
+      Serial.println("Please press Start first");//시작 버튼을 누르지 않고 모터 조작 버튼을 누르면 출력되면서 아무 일도 일어나지 않음
+      delay(500);
+    }
+  }
+}
