@@ -3,44 +3,44 @@ import serial
 import time
 import sys
 
-# UTF-8 인코딩 설정
+# Ensure UTF-8 encoding for proper text output
 sys.stdout.reconfigure(encoding='utf-8')
 
-# 직렬 포트 설정
-mega_port = "/dev/ttyUSB0"   # Mega 보드
-uno_port_1 = "/dev/ttyUSB1"  # 첫 번째 Uno 보드
+# Serial port configuration
+mega_port = "/dev/ttyUSB0"   # Mega board
+uno_port_1 = "/dev/ttyUSB1"  # First Uno board
 
-# 직렬 포트 속성
-baud_rate = 9600  # 아두이노 기본 전송 속도
-timeout = 1       # 응답 대기 시간 (초)
+# Serial port properties
+baud_rate = 9600  # Default baud rate for Arduino
+timeout = 1       # Response timeout (seconds)
 
-# Mega 보드와 Uno 보드의 시리얼 포트 연결
+# Establish serial communication with Mega and Uno boards
 try:
     mega_serial = serial.Serial(mega_port, baud_rate, timeout=timeout)
     uno_serial_1 = serial.Serial(uno_port_1, baud_rate, timeout=timeout)
-    print("✅ 직렬 연결이 성공적으로 설정되었습니다.")
+    print("Serial connections established successfully.")
 except Exception as e:
-    print(f"⚠️ 직렬 포트 열기 오류: {e}")
+    print(f"Error opening serial port: {e}")
     exit(1)
 
-# 데이터 읽고 전달하는 루프
+# Main loop: Read from Mega and forward data to Uno if needed
 try:
     while True:
-        if mega_serial.in_waiting > 0:  # 수신된 데이터가 있으면
+        if mega_serial.in_waiting > 0:  # Check if data is available
             received_data = mega_serial.readline().decode('utf-8').strip()
-            print(f"📩 Mega에서 수신: {received_data}")
+            print(f"Received from Mega: {received_data}")
 
             if received_data == "1":
-                uno_serial_1.write(b"1\n")  # Uno 보드로 "1" 전송
-                print("📤 '1'을 Uno 보드로 전송함")
+                uno_serial_1.write(b"1\n")  # Send "1" to Uno board
+                print("Sent '1' to Uno Board 1")
 
-        time.sleep(0.1)  # CPU 점유율 감소를 위해 대기
+        time.sleep(0.1)  # Reduce CPU usage
 
 except KeyboardInterrupt:
-    print("🛑 프로그램 종료됨.")
+    print("Program terminated by user.")
 
 finally:
-    # 프로그램 종료 시 직렬 포트 닫기
+    # Close serial ports before exiting
     mega_serial.close()
     uno_serial_1.close()
-    print("🔌 직렬 포트가 닫혔습니다.")
+    print("Serial ports closed.")
