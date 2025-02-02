@@ -10,7 +10,6 @@ sys.stdout.reconfigure(encoding='utf-8')
 mega_port = "/dev/ttyACM0"   # Mega board
 uno_port_1 = "/dev/ttyUSB0"  # First Uno board
 
-
 # Serial port properties
 baud_rate = 9600  # Default baud rate for Arduino
 timeout = 1       # Response timeout (seconds)
@@ -29,25 +28,31 @@ try:
     while True:
         if mega_serial.in_waiting > 0:  # Check if data is available
             received_data = mega_serial.readline().strip()  # Read raw bytes
-            received_data_uno1 = uno_serial_1.readline().strip()
+            
             print(f"Received from Mega: {received_data}")
 
             if received_data == b"1START":  # Ensure it's a byte, not a string
                 uno_serial_1.write(b'1')  # Send raw byte (integer 1)
                 print("Successfully sent integer 1 to Uno Board 1")
                 
-                if mega_serial.in_waiting > 0:
-                    if received_data == b"PUSH":
-                        uno_serial_1.write(b'2')
-                        print("Successfully sent integer 2 to Uno Board 1")
-                    
-                        if mega_serial.in_waiting > 0:
-                            if received_data_uno1 == b"3":
-                                print(f"Received from Uno1: {received_data_uno1}")
-                                uno_serial_1.write(b'4')
-                                print("Successfully sent integer 4 to Uno Board 1")
-                    
-                    
+                # Wait for PUSH from Mega
+                while True:
+                    if mega_serial.in_waiting > 0:
+                        received_data = mega_serial.readline().strip()
+                        if received_data == b"PUSH":
+                            uno_serial_1.write(b'2')  # Send 2 to Uno
+                            print("Successfully sent integer 2 to Uno Board 1")
+                            break  # Exit loop when PUSH is received
+                
+                # Wait for "3" from Uno
+                while True:
+                    if uno_serial_1.in_waiting > 0:
+                        received_data_uno1 = uno_serial_1.readline().strip()
+                        if received_data_uno1 == b"3":
+                            print(f"Received from Uno1: {received_data_uno1}")
+                            uno_serial_1.write(b'4')  # Send 4 to Uno
+                            print("Successfully sent integer 4 to Uno Board 1")
+                            break  # Exit loop when 3 is received
 
         time.sleep(0.1)  # Reduce CPU usage
 
