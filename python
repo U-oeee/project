@@ -27,12 +27,12 @@ except Exception as e:
 try:
     while True:
         if mega_serial.in_waiting > 0:  # Check if data is available
-            received_data = mega_serial.readline().decode('utf-8').strip()
+            received_data = mega_serial.readline().strip()  # Read raw bytes
             print(f"Received from Mega: {received_data}")
 
-            if received_data == "1":
-                uno_serial_1.write(b"1\n")  # Send "1" to Uno board
-                print("Sent '1' to Uno Board 1")
+            if received_data == b"1":  # Ensure it's a byte, not a string
+                uno_serial_1.write(b'\x01')  # Send raw byte (integer 1)
+                print("Successfully sent integer 1 to Uno Board 1")
 
         time.sleep(0.1)  # Reduce CPU usage
 
