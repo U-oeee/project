@@ -1,5 +1,4 @@
 // 4방향 스위치 핀 설정
-
 int dirDown = 3;
 int dirUp = 11;
 int dirRight = 9;
@@ -18,83 +17,147 @@ const int yMinPosition = -132;
 const int yMaxPosition = 0;
 
 // 현재 위치 추적
-int currentX = 0; // X축 초기 위치 (중간값)
-int currentY = 0; // Y축 초기 위치 (중간값)
+int currentX = 0;
+int currentY = 0;
+int savedX = 0;
+int savedY = 0;
 
-// 속도 설정 (중간값으로 조정)
-int minSpeed = 300; // 최소 딜레이 (마이크로초)
-int maxSpeed = 800; // 최대 딜레이 (마이크로초)
+// 속도 설정
+int minSpeed = 300;
+int maxSpeed = 800;
+
+// 동작 플래그
+bool isActive = false;
+bool isAutoMoving = false; // 자동 이동 여부
+
+// 함수 프로토타입 선언
+void moveToPositionWithMotor(int targetX, int targetY, int speed);
+void stopMotors();
+void handleJoystickControl();
+void moveMotor(int dirPin, int stepPin, int direction, int speed);
 
 void setup() {
-  // 4방향 스위치 핀 설정
+  Serial.begin(9600);
+  Serial.print("Initial Position - X: ");
+  Serial.print(currentX);
+  Serial.print(", Y: ");
+  Serial.println(currentY);
+  
   pinMode(dirDown, INPUT);
   pinMode(dirUp, INPUT);
   pinMode(dirRight, INPUT);
   pinMode(dirLeft, INPUT);
 
-  // 스텝 모터 핀 설정
   pinMode(M1dirpin, OUTPUT);
   pinMode(M1steppin, OUTPUT);
   pinMode(M2dirpin, OUTPUT);
   pinMode(M2steppin, OUTPUT);
 
-  Serial.begin(9600);
+  Serial.println("Enter 1 to start, 0 to stop");
 }
 
 void loop() {
-  // 가변저항 값을 읽어 속도 계산
-  int potValue = analogRead(A0); // 가변저항 값 읽기
-  int speed = map(potValue, 0, 1023, minSpeed, maxSpeed); // 속도 계산
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    if (command == '1') {
+      isActive = true;
+      Serial.println("Motor control activated");
+    } else if (command == '2') {
+      isActive = false;
+      Serial.println("Motor control stopped");
+      stopMotors();
+      Serial.println("3");
+      savedX = currentX;
+      savedY = currentY;
+    } else if (command == '4') {
+      isAutoMoving = true;
+      moveToPositionWithMotor(10, savedY, 600);  // 현재 위치 → (10, savedY)
+      moveToPositionWithMotor(10, -114, 600);    // (10, savedY) → (10, -114)
+      delay(5000);
+      moveToPositionWithMotor(0, -114, 600);     // (10, -114) → (0, -114)
+      moveToPositionWithMotor(0, 0, 600);        // (0, -114) → (0, 0)
+      isAutoMoving = false;
+    }
+  }
+  
+  if (!isActive || isAutoMoving) return;
+  
+  handleJoystickControl();
+}
 
-  // 4방향 스위치 입력 처리
-  if (digitalRead(dirDown) == LOW && currentY > yMinPosition) {
-    Serial.print("Down, Speed: ");
-    Serial.println(speed);
-    moveMotor(M2dirpin, M2steppin, HIGH, speed); // 아래쪽: Y축 모터 정방향
-    currentY--; // Y축 위치 감소
-  } else if (digitalRead(dirUp) == LOW && currentY < yMaxPosition) {
-    Serial.print("Up, Speed: ");
-    Serial.println(speed);
-    moveMotor(M2dirpin, M2steppin, LOW, speed); // 위쪽: Y축 모터 역방향
-    currentY++; // Y축 위치 증가
-  } else if (digitalRead(dirRight) == LOW && currentX < xMaxPosition) {
-    Serial.print("Right, Speed: ");
-    Serial.println(speed);
-    moveMotor(M1dirpin, M1steppin, LOW, speed); // 오른쪽: X축 모터 역방향
-    currentX++; // X축 위치 증가
-  } else if (digitalRead(dirLeft) == LOW && currentX > xMinPosition) {
-    Serial.print("Left, Speed: ");
-    Serial.println(speed);
-    moveMotor(M1dirpin, M1steppin, HIGH, speed); // 왼쪽: X축 모터 정방향
-    currentX--; // X축 위치 감소
-  } else {
-    Serial.println("Stop");
-    stopMotors(); // 모든 모터 정지
+void stopMotors() {
+  digitalWrite(M1steppin, LOW);
+  digitalWrite(M2steppin, LOW);
+}
+
+void moveToPositionWithMotor(int targetX, int targetY, int speed) {
+  targetX = constrain(targetX, xMinPosition, xMaxPosition);
+  targetY = constrain(targetY, yMinPosition, yMaxPosition);
+
+  while (currentX != targetX) {
+    if (currentX < targetX) {
+      moveMotor(M1dirpin, M1steppin, LOW, speed);
+      currentX++;
+    } else if (currentX > targetX) {
+      moveMotor(M1dirpin, M1steppin, HIGH, speed);
+      currentX--;
+    }
+    Serial.print("Moving X: ");
+    Serial.println(currentX);
   }
 
-  // 현재 위치 출력
+  while (currentY != targetY) {
+    if (currentY < targetY) {
+      moveMotor(M2dirpin, M2steppin, LOW, speed);
+      currentY++;
+    } else if (currentY > targetY) {
+      moveMotor(M2dirpin, M2steppin, HIGH, speed);
+      currentY--;
+    }
+    Serial.print("Moving Y: ");
+    Serial.println(currentY);
+  }
+  
+  stopMotors();
+  Serial.println("Target position reached");
+}
+
+void handleJoystickControl() {
+  int potValue = analogRead(A0);
+  int speed = map(potValue, 0, 1023, minSpeed, maxSpeed);
+
+  bool up = digitalRead(dirUp) == LOW;
+  bool down = digitalRead(dirDown) == LOW;
+  bool left = digitalRead(dirLeft) == LOW;
+  bool right = digitalRead(dirRight) == LOW;
+
+  if (up && currentY < yMaxPosition) {
+    moveMotor(M2dirpin, M2steppin, LOW, speed);
+    currentY++;
+  } else if (down && currentY > yMinPosition) {
+    moveMotor(M2dirpin, M2steppin, HIGH, speed);
+    currentY--;
+  } else if (right && currentX < xMaxPosition) {
+    moveMotor(M1dirpin, M1steppin, LOW, speed);
+    currentX++;
+  } else if (left && currentX > xMinPosition) {
+    moveMotor(M1dirpin, M1steppin, HIGH, speed);
+    currentX--;
+  } else {
+    stopMotors();
+  }
   Serial.print("Current X: ");
   Serial.print(currentX);
   Serial.print(", Current Y: ");
   Serial.println(currentY);
-
-  delay(10); // 상태 확인 딜레이
 }
 
-// 스텝 모터 제어 함수
 void moveMotor(int dirPin, int stepPin, int direction, int speed) {
-  digitalWrite(dirPin, direction); // 방향 설정
-
-  for (int i = 0; i < 50; i++) { // 반복 횟수를 줄여 속도를 부드럽게
+  digitalWrite(dirPin, direction);
+  for (int i = 0; i < 50; i++) {
     digitalWrite(stepPin, HIGH);
-    delayMicroseconds(speed); // 계산된 속도로 회전
+    delayMicroseconds(speed);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(speed);
   }
-}
-
-// 모터 정지 함수
-void stopMotors() {
-  digitalWrite(M1steppin, LOW);
-  digitalWrite(M2steppin, LOW);
 }
