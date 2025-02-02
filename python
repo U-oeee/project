@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
 import serial
 import time
+import sys
+
+# UTF-8 인코딩 설정
+sys.stdout.reconfigure(encoding='utf-8')
 
 # 직렬 포트 설정
 mega_port = "/dev/ttyUSB0"   # Mega 보드
@@ -13,9 +18,9 @@ timeout = 1       # 응답 대기 시간 (초)
 try:
     mega_serial = serial.Serial(mega_port, baud_rate, timeout=timeout)
     uno_serial_1 = serial.Serial(uno_port_1, baud_rate, timeout=timeout)
-    print("Serial connections established successfully.")
+    print("✅ 직렬 연결이 성공적으로 설정되었습니다.")
 except Exception as e:
-    print(f"Error opening serial port: {e}")
+    print(f"⚠️ 직렬 포트 열기 오류: {e}")
     exit(1)
 
 # 데이터 읽고 전달하는 루프
@@ -23,18 +28,19 @@ try:
     while True:
         if mega_serial.in_waiting > 0:  # 수신된 데이터가 있으면
             received_data = mega_serial.readline().decode('utf-8').strip()
-            print(f"Mega received: {received_data}")
+            print(f"📩 Mega에서 수신: {received_data}")
 
             if received_data == "1":
                 uno_serial_1.write(b"1\n")  # Uno 보드로 "1" 전송
-                print("Sent '1' to Uno Board 1")
+                print("📤 '1'을 Uno 보드로 전송함")
 
         time.sleep(0.1)  # CPU 점유율 감소를 위해 대기
 
 except KeyboardInterrupt:
-    print("Exiting program.")
+    print("🛑 프로그램 종료됨.")
 
 finally:
     # 프로그램 종료 시 직렬 포트 닫기
     mega_serial.close()
     uno_serial_1.close()
+    print("🔌 직렬 포트가 닫혔습니다.")
