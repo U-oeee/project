@@ -1,0 +1,40 @@
+import serial
+import time
+
+# 직렬 포트 설정
+mega_port = "/dev/ttyUSB0"   # Mega 보드
+uno_port_1 = "/dev/ttyUSB1"  # 첫 번째 Uno 보드
+
+# 직렬 포트 속성
+baud_rate = 9600  # 아두이노 기본 전송 속도
+timeout = 1       # 응답 대기 시간 (초)
+
+# Mega 보드와 Uno 보드의 시리얼 포트 연결
+try:
+    mega_serial = serial.Serial(mega_port, baud_rate, timeout=timeout)
+    uno_serial_1 = serial.Serial(uno_port_1, baud_rate, timeout=timeout)
+    print("Serial connections established successfully.")
+except Exception as e:
+    print(f"Error opening serial port: {e}")
+    exit(1)
+
+# 데이터 읽고 전달하는 루프
+try:
+    while True:
+        if mega_serial.in_waiting > 0:  # 수신된 데이터가 있으면
+            received_data = mega_serial.readline().decode('utf-8').strip()
+            print(f"Mega received: {received_data}")
+
+            if received_data == "1":
+                uno_serial_1.write(b"1\n")  # Uno 보드로 "1" 전송
+                print("Sent '1' to Uno Board 1")
+
+        time.sleep(0.1)  # CPU 점유율 감소를 위해 대기
+
+except KeyboardInterrupt:
+    print("Exiting program.")
+
+finally:
+    # 프로그램 종료 시 직렬 포트 닫기
+    mega_serial.close()
+    uno_serial_1.close()
