@@ -1,8 +1,9 @@
 // 4방향 스위치 핀 설정
-int dirDown = 10;
-int dirUp = 9;
-int dirRight = 3;
-int dirLeft = 11;
+
+int dirDown = 3;
+int dirUp = 11;
+int dirRight = 9;
+int dirLeft = 10;
 
 // 스텝 모터 핀 설정
 int M1dirpin = 7;
@@ -11,10 +12,10 @@ int M2dirpin = 4;
 int M2steppin = 5;
 
 // 이동 범위 설정
-const int xMinPosition = -56;
-const int xMaxPosition = 48;
-const int yMinPosition = -65;
-const int yMaxPosition = 70;
+const int xMinPosition = 0;
+const int xMaxPosition = 104;
+const int yMinPosition = -132;
+const int yMaxPosition = 0;
 
 // 현재 위치 추적
 int currentX = 0; // X축 초기 위치 (중간값)
