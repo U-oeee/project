@@ -29,6 +29,7 @@ int maxSpeed = 800;
 // 동작 플래그
 bool isActive = false;
 bool isAutoMoving = false; // 자동 이동 여부
+bool waitingForFive = false; // '5' 입력 대기 상태
 
 // 함수 프로토타입 선언
 void moveToPositionWithMotor(int targetX, int targetY, int speed);
@@ -71,11 +72,14 @@ void loop() {
       savedY = currentY;
     } else if (command == '4') {
       isAutoMoving = true;
-      moveToPositionWithMotor(10, savedY, 600);  // 현재 위치 → (10, savedY)
-      moveToPositionWithMotor(10, -114, 600);    // (10, savedY) → (10, -114)
-      delay(5000);
-      moveToPositionWithMotor(0, -114, 600);     // (10, -114) → (0, -114)
-      moveToPositionWithMotor(0, 0, 600);        // (0, -114) → (0, 0)
+      Serial.println("Moving to (10, -114)...");
+      moveToPositionWithMotor(10, -114, 600);
+      Serial.println("Waiting for '5' signal...");
+      waitingForFive = true;
+    } else if (command == '5' && waitingForFive) {
+      Serial.println("'5' received. Moving to (0,0)...");
+      moveToPositionWithMotor(0, 0, 600);
+      waitingForFive = false;
       isAutoMoving = false;
     }
   }
