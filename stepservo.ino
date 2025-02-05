@@ -29,22 +29,20 @@ void loop() {
 
             // 🔵 5초 동안 스텝 모터 정회전
             Serial.println("Step Motor: Rotating forward...");
-            digitalWrite(M1dirpin, HIGH);
+            digitalWrite(M1dirpin, LOW);
             rotateStepper(rotationTime);
             
             // 🔵 서보 모터 180도 회전
-            Serial.println("Servo Motor: Moving to 180 degrees...");
-            myServo.write(180);
-            delay(1000);  // 서보 모터가 움직일 시간
+            //myServo.write(180);
+            delay(3000);  // 서보 모터가 움직일 시간
             
             // 🔵 5초 동안 스텝 모터 역회전
             Serial.println("Step Motor: Rotating backward...");
-            digitalWrite(M1dirpin, LOW);
+            digitalWrite(M1dirpin, HIGH);
             rotateStepper(rotationTime);
 
             // 🔵 완료 메시지 출력
-            Serial.println("Motor sequence complete.");
-            Serial.println(4);
+            Serial.println("4");
         }
     }
 }
