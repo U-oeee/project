@@ -63,7 +63,7 @@ void loop() {
             rotateStepper(4000);
 
             // 🔵 완료 메시지 출력
-            Serial.println("Done");
+            Serial.println("6");
         }
     }
 }
