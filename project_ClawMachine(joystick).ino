@@ -74,10 +74,10 @@ void loop() {
       isAutoMoving = true;
       Serial.println("Moving to (10, -114)...");
       moveToPositionWithMotor(10, -114, 600);
-      Serial.println("Waiting for '5' signal...");
+      Serial.println("5");
       waitingForFive = true;
-    } else if (command == '5' && waitingForFive) {
-      Serial.println("'5' received. Moving to (0,0)...");
+    } else if (command == '6' && waitingForFive) {
+      Serial.println("'6' received. Moving to (0,0)...");
       moveToPositionWithMotor(0, 0, 600);
       waitingForFive = false;
       isAutoMoving = false;
