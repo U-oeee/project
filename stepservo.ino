@@ -7,7 +7,7 @@ const int servoPin = 3;  // 서보 모터 핀
 Servo myServo;  // 서보 모터 객체 생성
 
 int stepDelay = 1000;  // 스텝 모터 속도 조절 (마이크로초)
-int rotationTime = 4000;  // 스텝 모터 동작 시간 (3.5초)
+int rotationTime = 4000;  // 스텝 모터 동작 시간 (4초)
 
 // 🛠 Setup: 핀 모드 설정 및 시리얼 초기화
 void setup() {
@@ -32,9 +32,14 @@ void loop() {
             digitalWrite(M1dirpin, LOW);
             rotateStepper(rotationTime);
             
-            // 🔵 서보 모터 180도 회전
-            //myServo.write(180);
-            delay(3500);  // 서보 모터가 움직일 시간
+            // 🔵 서보 모터 3.5초 동안 시계 방향 회전 후 정지
+            Serial.println("Servo Motor: Rotating clockwise...");
+            myServo.write(0);  // 시계 방향 회전
+            delay(3500);
+            myServo.write(90);
+            myServo.write(180);
+            delay(4000);
+            myServo.write(90);   // 정지
             
             // 🔵 3.5초 동안 스텝 모터 정회전
             Serial.println("Step Motor: Rotating backward...");
@@ -53,9 +58,12 @@ void loop() {
             digitalWrite(M1dirpin, LOW);
             rotateStepper(4000);
             
-            // 🔵 3.5초 대기
-            Serial.println("Waiting...");
+            myServo.write(0);  // 시계 방향 회전
+            delay(3500);
+            myServo.write(90);
+            myServo.write(180);
             delay(4000);
+            myServo.write(90);   // 정지
             
             // 🔵 3.5초 동안 스텝 모터 정회전
             Serial.println("Step Motor: Rotating backward...");
