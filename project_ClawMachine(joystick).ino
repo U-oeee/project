@@ -72,8 +72,8 @@ void loop() {
       savedY = currentY;
     } else if (command == '4') {
       isAutoMoving = true;
-      Serial.println("Moving to (10, -114)...");
-      moveToPositionWithMotor(10, -114, 600);
+      Serial.println("Moving to (20, -132)...");
+      moveToPositionWithMotor(20, -132, 600);
       Serial.println("5");
       waitingForFive = true;
     } else if (command == '6' && waitingForFive) {
