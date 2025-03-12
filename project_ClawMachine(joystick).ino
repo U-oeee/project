@@ -82,6 +82,7 @@ void loop() {
       moveToPositionWithMotor(0, 0, 600);
       waitingForFive = false;
       isAutoMoving = false;
+      Serial.println("7");
     }
   }
   
