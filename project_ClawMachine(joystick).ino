@@ -67,6 +67,7 @@ void loop() {
       isActive = false;
       Serial.println("Motor control stopped");
       stopMotors();
+      delay(1000);
       Serial.println("3");
       savedX = currentX;
       savedY = currentY;
