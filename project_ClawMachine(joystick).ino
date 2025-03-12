@@ -62,10 +62,8 @@ void loop() {
     char command = Serial.read();
     if (command == '1') {
       isActive = true;
-      Serial.println("Motor control activated");
     } else if (command == '2') {
       isActive = false;
-      Serial.println("Motor control stopped");
       stopMotors();
       delay(1000);
       Serial.println("3");
@@ -73,12 +71,10 @@ void loop() {
       savedY = currentY;
     } else if (command == '4') {
       isAutoMoving = true;
-      Serial.println("Moving to (20, -132)...");
       moveToPositionWithMotor(20, -132, 600);
       Serial.println("5");
       waitingForFive = true;
     } else if (command == '6' && waitingForFive) {
-      Serial.println("'6' received. Moving to (0,0)...");
       moveToPositionWithMotor(0, 0, 600);
       waitingForFive = false;
       isAutoMoving = false;
